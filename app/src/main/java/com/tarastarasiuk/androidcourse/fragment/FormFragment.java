@@ -4,6 +4,7 @@ import static android.text.TextUtils.isEmpty;
 import static com.tarastarasiuk.androidcourse.constant.AppConstant.RESULT_FRAGMENT_ARG;
 import static java.util.Objects.isNull;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,12 +19,17 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.tarastarasiuk.androidcourse.activity.listener.OnFragmentInteractionListener;
 import com.tarastarasiuk.androidcourse.R;
+import com.tarastarasiuk.androidcourse.activity.listener.OnFragmentInteractionListener;
+import com.tarastarasiuk.androidcourse.database.DatabaseRepository;
+import com.tarastarasiuk.androidcourse.database.impl.DefaultDatabaseRepository;
 import com.tarastarasiuk.androidcourse.exception.OperationPerformException;
+import com.tarastarasiuk.androidcourse.model.TrackedResultModel;
 import com.tarastarasiuk.androidcourse.operation.Operation;
 import com.tarastarasiuk.androidcourse.operation.OperationFactory;
 import com.tarastarasiuk.androidcourse.util.FragmentUtil;
+
+import java.util.Date;
 
 public class FormFragment extends Fragment {
 
@@ -66,10 +72,16 @@ public class FormFragment extends Fragment {
                 sendResultToResultFragment(result, getActivity().getSupportFragmentManager(),
                         ((OnFragmentInteractionListener) getActivity()).getFragmentPlaceholderViewId());
 
+                trackResultToDb(getContext(), result);
             } catch (OperationPerformException e) {
                 Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void trackResultToDb(Context context, String result) {
+        DatabaseRepository DatabaseRepository = DefaultDatabaseRepository.getInstance(context);
+        DatabaseRepository.createTrackedResult(new TrackedResultModel(result, new Date()));
     }
 
     private boolean validateInputData(EditText editText1, EditText editText2, RadioGroup operationRadioGroup) {
